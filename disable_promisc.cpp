@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) {
         std::cerr << "Usage: " << argv[0] << " <interface_name>" << std::endl;
         return 1;
     }
-
     const char* interface_name = argv[1];
     int sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (sockfd < 0) {
@@ -33,12 +32,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Check if promiscuous mode is enabled
-    if (ifr.ifr_flags & IFF_PROMISC) {
-        std::cout << "Promiscuous mode is enabled on " << interface_name << std::endl;
-    } else {
-        std::cout << "Promiscuous mode is not enabled on " << interface_name << std::endl;
+    // Set the promiscuous mode flag
+    ifr.ifr_flags &= ~IFF_PROMISC;
+
+    // Set the new flags
+    if (ioctl(sockfd, SIOCSIFFLAGS, &ifr) < 0) {
+        std::cerr << "Error setting flags: " << strerror(errno) << std::endl;
+        close(sockfd);
+        return 1;
     }
+
+    std::cout << "Promiscuous mode enabled on " << interface_name << std::endl;
 
     close(sockfd);
     return 0;
