@@ -9,7 +9,7 @@
 #include <cerrno>
 #include <iostream>
 
-#define DEVICE "/dev/ptp0"
+#define DEVICE_TEMPLATE "/dev/ptp%d"
 
 clockid_t FileDescriptorToClockId(int file_descriptor) {
     constexpr clockid_t CLOCK_FD = 3;
@@ -19,17 +19,21 @@ clockid_t FileDescriptorToClockId(int file_descriptor) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <get|set> [seconds nanoseconds]" << std::endl;
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <device_number> <get|set|adj|fine> " << std::endl;
         return 1;
     }
 
-    std::string command = argv[1];
+    int device_number = std::stoi(argv[1]);
     int phc_fd_ = -1;
+    char device_path[20];
+    snprintf(device_path, sizeof(device_path), DEVICE_TEMPLATE, device_number);
 
+    std::string command = argv[2];
     if (command == "get") {
         // Open the PTP device
-        phc_fd_ = open(DEVICE, O_RDONLY);
+        //phc_fd_ = open(DEVICE, O_PATH);
+        phc_fd_ = open(device_path, O_RDONLY);
         //phc_fd_ = open(DEVICE, O_RDWR);
         if (phc_fd_ < 0) {
             std::cerr << "Error opening device: " << strerror(errno) << std::endl;
@@ -37,6 +41,9 @@ int main(int argc, char *argv[]) {
         }
 
         auto phc_clkid_ = FileDescriptorToClockId(phc_fd_);
+        std::cout << "File descriptor (phc_fd_): " << phc_fd_ << std::endl;
+        std::cout << "Clock ID (phc_clkid_): " << phc_clkid_ << std::endl;
+
         timespec ts{};
         if (clock_gettime(phc_clkid_, &ts) < 0) {
             std::cerr << "Error getting time: " << strerror(errno) << std::endl;
@@ -45,16 +52,18 @@ int main(int argc, char *argv[]) {
         }
 
         close(phc_fd_);
-    }
-    else if (command == "set") {
+    } else if (command == "set") {
         // Open the PTP device
-        phc_fd_ = open(DEVICE, O_RDWR);
+        phc_fd_ = open(device_path, O_RDWR);
         if (phc_fd_ < 0) {
             std::cerr << "Error opening device: " << strerror(errno) << std::endl;
             return 1;
         }
 
         auto phc_clkid_ = FileDescriptorToClockId(phc_fd_);
+        std::cout << "File descriptor (phc_fd_): " << phc_fd_ << std::endl;
+        std::cout << "Clock ID (phc_clkid_): " << phc_clkid_ << std::endl;
+
         // Set the time
         struct tm tm = {};
         tm.tm_year = 2025 - 1900; // Year since 1900
@@ -73,8 +82,31 @@ int main(int argc, char *argv[]) {
         }
 
         close(phc_fd_);
-    }
-    else {
+    } else if (command == "adj") {
+        // Open the PTP device
+        phc_fd_ = open(device_path, O_RDWR);
+        if (phc_fd_ < 0) {
+            std::cerr << "Error opening device: " << strerror(errno) << std::endl;
+            return 1;
+        }
+
+        auto phc_clkid_ = FileDescriptorToClockId(phc_fd_);
+        std::cout << "File descriptor (phc_fd_): " << phc_fd_ << std::endl;
+        std::cout << "Clock ID (phc_clkid_): " << phc_clkid_ << std::endl;
+
+        // Adjust the time
+        struct timex tx = {};
+        tx.modes = ADJ_OFFSET;
+        tx.offset = 1000;
+
+        if (clock_adjtime(phc_clkid_, &tx) < 0) {
+            std::cerr << "Error adjusting time: " << strerror(errno) << std::endl;
+            close(phc_fd_);
+            return 1;
+        }
+
+        close(phc_fd_);
+    } else {
         std::cerr << "Invalid command: " << command << std::endl;
         return 1;
     }
