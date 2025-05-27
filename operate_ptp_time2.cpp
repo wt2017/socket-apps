@@ -9,7 +9,7 @@
 #include <cerrno>
 #include <iostream>
 
-#define DEVICE_TEMPLATE "/host-dev/mrvl_ptp%d"
+#define DEVICE_TEMPLATE "/dev/mrvl_ptp%d"
 
 clockid_t FileDescriptorToClockId(int file_descriptor) {
     constexpr clockid_t CLOCK_FD = 3;
@@ -40,17 +40,22 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
+        #if 0
         auto phc_clkid_ = FileDescriptorToClockId(phc_fd_);
         std::cout << "File descriptor (phc_fd_): " << phc_fd_ << std::endl;
         std::cout << "Clock ID (phc_clkid_): " << phc_clkid_ << std::endl;
 
         timespec ts{};
-        if (clock_gettime(phc_clkid_, &ts) < 0) {
+        #endif
+
+        char buf[128];
+        if (read(phc_fd_, buf, 128) < 0) {
             std::cerr << "Error getting time: " << strerror(errno) << std::endl;
             close(phc_fd_);
             return 1;
         }
 
+        std::cout << "T: " << buf << std::endl;
         close(phc_fd_);
     } else if (command == "set") {
         // Open the PTP device
