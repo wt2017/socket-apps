@@ -1,11 +1,11 @@
+#include <fcntl.h>
+#include <linux/ptp_clock.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <linux/ptp_clock.h>
-#include <time.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <time.h>
+#include <unistd.h>
 #include <cerrno>
 #include <iostream>
 
@@ -18,7 +18,7 @@ clockid_t FileDescriptorToClockId(int file_descriptor) {
     return clock_id;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <device_number>" << std::endl;
         return 1;

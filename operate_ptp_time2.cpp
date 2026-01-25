@@ -1,11 +1,11 @@
+#include <fcntl.h>
+#include <linux/ptp_clock.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <linux/ptp_clock.h>
-#include <time.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <time.h>
+#include <unistd.h>
 #include <cerrno>
 #include <iostream>
 
@@ -18,7 +18,7 @@ clockid_t FileDescriptorToClockId(int file_descriptor) {
     return clock_id;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (argc < 3) {
         std::cerr << "Usage: " << argv[0] << " <device_number> <get|set|adj|fine> " << std::endl;
         return 1;
@@ -32,21 +32,21 @@ int main(int argc, char *argv[]) {
     std::string command = argv[2];
     if (command == "get") {
         // Open the PTP device
-        //phc_fd_ = open(DEVICE, O_PATH);
+        // phc_fd_ = open(DEVICE, O_PATH);
         phc_fd_ = open(device_path, O_RDONLY);
-        //phc_fd_ = open(DEVICE, O_RDWR);
+        // phc_fd_ = open(DEVICE, O_RDWR);
         if (phc_fd_ < 0) {
             std::cerr << "Error opening device: " << strerror(errno) << std::endl;
             return 1;
         }
 
-        #if 0
+#if 0
         auto phc_clkid_ = FileDescriptorToClockId(phc_fd_);
         std::cout << "File descriptor (phc_fd_): " << phc_fd_ << std::endl;
         std::cout << "Clock ID (phc_clkid_): " << phc_clkid_ << std::endl;
 
         timespec ts{};
-        #endif
+#endif
 
         char buf[128];
         if (read(phc_fd_, buf, 128) < 0) {
@@ -71,12 +71,12 @@ int main(int argc, char *argv[]) {
 
         // Set the time
         struct tm tm = {};
-        tm.tm_year = 2025 - 1900; // Year since 1900
-        tm.tm_mon = 1;     // Month [0-11]
-        tm.tm_mday = 20;        // Day of the month [1-31]
-        tm.tm_hour = 22;        // Hours since midnight [0-23]
-        tm.tm_min = 20;         // Minutes after the hour [0-59]
-        tm.tm_sec = 0;         // Seconds after the minute [0-60]
+        tm.tm_year = 2025 - 1900;  // Year since 1900
+        tm.tm_mon = 1;             // Month [0-11]
+        tm.tm_mday = 20;           // Day of the month [1-31]
+        tm.tm_hour = 22;           // Hours since midnight [0-23]
+        tm.tm_min = 20;            // Minutes after the hour [0-59]
+        tm.tm_sec = 0;             // Seconds after the minute [0-60]
         timespec ts{};
         ts.tv_sec = mktime(&tm);
         ts.tv_nsec = 0;

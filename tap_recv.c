@@ -1,13 +1,13 @@
 #include <fcntl.h>
-#include <sys/ioctl.h>
 #include <linux/if.h>
 #include <linux/if_tun.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 
-int create_tap_device(const char *dev_name) {
+int create_tap_device(const char* dev_name) {
     struct ifreq ifr;
     int fd, err;
 
@@ -20,7 +20,7 @@ int create_tap_device(const char *dev_name) {
     ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
     strncpy(ifr.ifr_name, dev_name, IFNAMSIZ);
 
-    if ((err = ioctl(fd, TUNSETIFF, (void *)&ifr)) < 0) {
+    if ((err = ioctl(fd, TUNSETIFF, (void*)&ifr)) < 0) {
         perror("ioctl(TUNSETIFF)");
         close(fd);
         return err;
@@ -30,7 +30,7 @@ int create_tap_device(const char *dev_name) {
 }
 
 int main() {
-    const char *tap_name = "octboot_net0";
+    const char* tap_name = "octboot_net0";
     int tap_fd = create_tap_device(tap_name);
     if (tap_fd < 0) {
         exit(EXIT_FAILURE);
@@ -58,16 +58,20 @@ int main() {
                 // Print packet details
                 unsigned short eth_type = (buffer[12] << 8) | buffer[13];
                 printf("Ethernet Type: 0x%04x ", eth_type);
-                if (eth_type == 0x0806) printf("(ARP)\n");
-                else if (eth_type == 0x0800) printf("(IPv4)\n");
-                else if (eth_type == 0x86dd) printf("(IPv6)\n");
-                else printf("(Other)\n");
-        
+                if (eth_type == 0x0806)
+                    printf("(ARP)\n");
+                else if (eth_type == 0x0800)
+                    printf("(IPv4)\n");
+                else if (eth_type == 0x86dd)
+                    printf("(IPv6)\n");
+                else
+                    printf("(Other)\n");
+
                 // Print source and destination MAC
-                printf("Source MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-                       buffer[6], buffer[7], buffer[8], buffer[9], buffer[10], buffer[11]);
-                printf("Dest MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-                       buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
+                printf("Source MAC: %02x:%02x:%02x:%02x:%02x:%02x\n", buffer[6], buffer[7], buffer[8], buffer[9],
+                       buffer[10], buffer[11]);
+                printf("Dest MAC: %02x:%02x:%02x:%02x:%02x:%02x\n", buffer[0], buffer[1], buffer[2], buffer[3],
+                       buffer[4], buffer[5]);
             }
 #if 0
             unsigned short eth_type = (buffer[12] << 8) | buffer[13];

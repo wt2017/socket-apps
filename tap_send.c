@@ -1,17 +1,17 @@
+#include <arpa/inet.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <net/ethernet.h>
+#include <net/if.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <sys/ioctl.h> 
-#include <linux/if_packet.h>
-#include <linux/if_ether.h>
-#include <net/ethernet.h>
-#include <net/if.h>
-#include <arpa/inet.h>
+#include <unistd.h>
 
 int main() {
-    const char *if_name = "octboot_net0";
+    const char* if_name = "octboot_net0";
     int sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (sockfd < 0) {
         perror("socket");
@@ -42,8 +42,8 @@ int main() {
 
     memcpy(packet, dest_mac, ETH_ALEN);
     memcpy(packet + ETH_ALEN, src_mac, ETH_ALEN);
-    memcpy(packet + 2*ETH_ALEN, &eth_type, sizeof(eth_type));
-    const char *message = "Hello from sender!";
+    memcpy(packet + 2 * ETH_ALEN, &eth_type, sizeof(eth_type));
+    const char* message = "Hello from sender!";
     memcpy(packet + ETH_HLEN, message, strlen(message));
 
     int packet_len = ETH_HLEN + strlen(message);

@@ -1,15 +1,15 @@
-#include <iostream>
-#include <cstring>
-#include <cerrno>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#include <unistd.h>
 #include <fcntl.h>
-#include <sys/socket.h>
-#include <netinet/in.h>      // For htons
 #include <linux/if_ether.h>  // For ETH_P_ALL
+#include <net/if.h>
+#include <netinet/in.h>  // For htons
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <cerrno>
+#include <cstring>
+#include <iostream>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <interface_name>" << std::endl;
         return 1;
@@ -47,4 +47,3 @@ int main(int argc, char *argv[]) {
     close(sockfd);
     return 0;
 }
-
